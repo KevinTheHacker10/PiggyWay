@@ -1,11 +1,13 @@
 import React from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
+  const router = useRouter();
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { fontFamily: 'Poppins_700Bold' }]}>PiggyWay</Text>
+      <Text style={[styles.title]}>PiggyWay</Text>
 
       <Text style={styles.label}>Correo/Usuario</Text>
       <TextInput
@@ -37,7 +39,10 @@ export default function LoginScreen() {
         <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.createAccountButton}>
+      <TouchableOpacity
+        style={styles.createAccountButton}
+        onPress={() => router.push('/registro')} // Navega a la pantalla de registro
+      >
         <Text style={styles.createAccountButtonText}>Crear Cuenta</Text>
       </TouchableOpacity>
 
