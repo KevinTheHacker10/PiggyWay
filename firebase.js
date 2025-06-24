@@ -4,6 +4,7 @@ import {
   createUserWithEmailAndPassword as firebaseCreateUserWithEmailAndPassword,
   getAuth
 } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -21,3 +22,6 @@ const app = initializeApp(firebaseConfig);
 // Exporta Auth y la función de registro
 export const auth = getAuth(app);
 export const createUserWithEmailAndPassword = firebaseCreateUserWithEmailAndPassword;
+const auth = getAuth(app);
+const db = getFirestore(app);
+export { auth, db };

@@ -27,7 +27,7 @@ const handleRegistro = async () => {
   try {
     await createUserWithEmailAndPassword(auth, correo, password);
     alert('Usuario registrado con éxito');
-    router.push('/Meta'); // <-- Redirección a la pantalla Meta
+    router.push({ pathname: '/Meta', params: { nombre } });// <-- Redirección a la pantalla Meta
   } catch (error: any) {
     alert(error?.message ?? 'Ocurrió un error inesperado');
   }
