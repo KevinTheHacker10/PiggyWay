@@ -1,108 +1,144 @@
 import { AntDesign } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { addDoc, collection, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
 import { useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { auth, db } from '../firebase';
-
 
 export default function Transacciones() {
   const [balance, setBalance] = useState(0);
   const [transacciones, setTransacciones] = useState<any[]>([]);
-  const handleGuardar = async () => {
-  const user = auth.currentUser;
-  if (!user) return Alert.alert("Error", "Usuario no autenticado");
+  const router = useRouter();
 
-
-useFocusEffect(() => {
-  const obtenerTransacciones = async () => {
+  const handleGuardar = async (descripcion: string, monto: string, tipo: string) => {
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) {
+      return Alert.alert('Error', 'Usuario no autenticado');
+    }
 
-    const q = query(
-      collection(db, 'transacciones'),
-      where('uid', '==', user.uid)
-    );
-    const querySnapshot = await getDocs(q);
-    const data = querySnapshot.docs.map(doc => doc.data());
-    setTransacciones(data);
-
-    const nuevoBalance = data.reduce((total, t) => total + parseFloat(t.monto), 0);
-    setBalance(nuevoBalance);
+    try {
+      await addDoc(collection(db, 'transacciones'), {
+        uid: user.uid,
+        descripcion,
+        monto: parseFloat(monto),
+        tipo,
+        timestamp: serverTimestamp(),
+      });
+      router.replace('/transacciones');
+    } catch (error: any) {
+      Alert.alert('Error al guardar', error.message);
+    }
   };
 
-  obtenerTransacciones();
-});
-  try {
-    await addDoc(collection(db, 'transacciones'), {
-      uid: user.uid,
-      descripcion,
-      monto: parseFloat(monto),
-      tipo,
-      timestamp: serverTimestamp(),
-    });
-    router.replace('/transacciones');
-  } catch (error) {
-    Alert.alert("Error al guardar", error.message);
-  }
-};
-
-  // Este efecto se activa cuando se vuelve a esta pantalla
   useFocusEffect(() => {
     const obtenerTransacciones = async () => {
-      const data = await getTransaccionesLocales();
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const q = query(collection(db, 'transacciones'), where('uid', '==', user.uid));
+      const querySnapshot = await getDocs(q);
+      const data = querySnapshot.docs.map(doc => doc.data());
       setTransacciones(data);
+
       const nuevoBalance = data.reduce((total, t) => total + parseFloat(t.monto), 0);
       setBalance(nuevoBalance);
     };
+
     obtenerTransacciones();
   });
 
-  // Simula la obtención local (mock)
-  const getTransaccionesLocales = async () => {
-    const datos = await globalThis.transaccionesGuardadas || [];
-    return datos;
-  };
-
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Mi Balance</Text>
-      <Text style={styles.balance}>₡ {balance.toFixed(2)}</Text>
+      <Text style={styles.titulo}>Transacciones</Text>
 
-      <Text style={styles.subtitulo}>Últimas transacciones</Text>
+      <View style={styles.balanceBox}>
+        <Text style={styles.balanceLabel}>Mi Balance</Text>
+        <Text style={styles.balance}>₡ {balance.toFixed(2)}</Text>
+      </View>
+
+      <Text style={styles.subtitulo}>Movimientos recientes</Text>
+
       <FlatList
         data={transacciones}
         keyExtractor={(_, index) => index.toString()}
+        contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.descripcion}>{item.descripcion}</Text>
-            <Text style={styles.monto}>{item.tipo === 'gasto' ? '-' : '+'}₡ {parseFloat(item.monto).toFixed(2)}</Text>
+          <View style={styles.card}>
+            <View>
+              <Text style={styles.descripcion}>{item.descripcion}</Text>
+              <Text style={styles.tipo}>
+                {item.tipo === 'gasto' ? 'Gasto' : 'Ingreso'} • {item.categoria || 'General'}
+              </Text>
+            </View>
+            <Text
+              style={[
+                styles.monto,
+                { color: item.tipo === 'gasto' ? '#E53935' : '#43A047' },
+              ]}
+            >
+              {item.tipo === 'gasto' ? '-' : '+'}₡ {parseFloat(item.monto).toFixed(2)}
+            </Text>
           </View>
         )}
       />
 
-      <TouchableOpacity style={styles.botonMas} onPress={() => router.push('/Movimientos')}>
-        <AntDesign name="pluscircle" size={60} color="#4CAF50" />
+      <TouchableOpacity
+        style={styles.botonMas}
+        onPress={() => router.push('/Movimientos')}
+      >
+        <AntDesign name="pluscircle" size={65} color="#FFA726" />
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  titulo: { fontSize: 22, fontWeight: 'bold' },
-  balance: { fontSize: 32, fontWeight: 'bold', marginVertical: 10, color: '#2E7D32' },
-  subtitulo: { fontSize: 18, marginVertical: 10 },
-  item: {
-    backgroundColor: '#F5F5F5',
-    padding: 15,
-    borderRadius: 10,
+  container: { flex: 1, backgroundColor: '#fff', padding: 20 },
+  titulo: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+    color: '#333',
+  },
+  balanceBox: {
+    backgroundColor: '#FFF3E0',
+    padding: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  balanceLabel: { fontSize: 16, color: '#666' },
+  balance: { fontSize: 36, fontWeight: 'bold', color: '#FFA726', marginTop: 5 },
+  subtitulo: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFA726',
+    marginBottom: 10,
+  },
+  card: {
+    backgroundColor: '#FAFAFA',
+    padding: 16,
+    borderRadius: 12,
     marginBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
   },
-  descripcion: { fontSize: 16 },
-  monto: { fontSize: 16, fontWeight: 'bold' },
+  descripcion: { fontSize: 16, fontWeight: '500', color: '#333' },
+  tipo: { fontSize: 13, color: '#999', marginTop: 2 },
+  monto: { fontSize: 18, fontWeight: 'bold' },
   botonMas: {
     position: 'absolute',
     bottom: 30,

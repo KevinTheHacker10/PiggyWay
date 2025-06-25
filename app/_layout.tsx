@@ -25,6 +25,9 @@ export default function RootLayout() {
          {/* Asegúrate de que tus otras rutas estén definidas aquí si no están en (tabs) */}
          <Stack.Screen name="login" options={{ headerShown: false }} />
          <Stack.Screen name="registro" options={{ headerShown: false }} />
+         <Stack.Screen name="Movimientos" options={{ headerShown: false }} />
+         <Stack.Screen name="transacciones" options={{ headerShown: false }} />
+         <Stack.Screen name="Inicio" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

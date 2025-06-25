@@ -55,8 +55,9 @@ export default function Inicio() {
                 <TouchableOpacity onPress={() => router.push('/transacciones')}>
                     <Ionicons name="refresh" size={24} color="#F79F1F" />
                 </TouchableOpacity>
-
-                <MaterialCommunityIcons name="bell-outline" size={24} color="#ccc" />
+                <TouchableOpacity onPress={() => router.push('/objetivos')}>
+                    <MaterialCommunityIcons name="target" size={30} color="#FFA726" />
+                </TouchableOpacity>
                 <FontAwesome5 name="graduation-cap" size={22} color="#ccc" />
             </View>
         </View>

@@ -22,6 +22,5 @@ const app = initializeApp(firebaseConfig);
 // Exporta Auth y la función de registro
 export const auth = getAuth(app);
 export const createUserWithEmailAndPassword = firebaseCreateUserWithEmailAndPassword;
-const auth = getAuth(app);
-const db = getFirestore(app);
-export { auth, db };
+export const db = getFirestore(app);
+
