@@ -1,4 +1,4 @@
-import { FontAwesome5, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
@@ -55,6 +55,10 @@ export default function Movimientos() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.botonAtras}>
+  <AntDesign name="arrowleft" size={28} color="#FFA726" />
+</TouchableOpacity>
+
       <Text style={styles.titulo}>Agregar Transacción</Text>
 
       <Text style={styles.label}>Descripción</Text>
@@ -214,4 +218,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  botonAtras: {
+  position: 'absolute',
+  top: 30,
+  left: 20,
+  zIndex: 10,
+},
+
 });

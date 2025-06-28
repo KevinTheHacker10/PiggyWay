@@ -1,3 +1,4 @@
+import AntDesign from '@expo/vector-icons/build/AntDesign';
 import { useRouter } from 'expo-router';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import React, { useState } from 'react';
@@ -21,6 +22,10 @@ export default function RestablecerContrasena() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.botonAtras}>
+  <AntDesign name="arrowleft" size={28} color="#FFA726" />
+</TouchableOpacity>
+
       <Text style={styles.title}>Restablecer contraseña</Text>
       <Text style={styles.text}>
         Introduzca su dirección de correo electrónico para recibir un enlace de restablecimiento de contraseña.
@@ -60,6 +65,12 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: '#fff', fontWeight: 'bold' },
   back: { textAlign: 'center', color: '#888', marginTop: 30 },
+  botonAtras: {
+  position: 'absolute',
+  top: 30,
+  left: 20,
+  zIndex: 10,
+}
 });
 // This file is for resetting the password in the PiggyWay app.
 // It allows users to enter their email and receive a password reset link.

@@ -1,11 +1,11 @@
 import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const objetivosDummy = [
@@ -60,6 +60,10 @@ export default function Objetivos() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.botonAtras}>
+  <AntDesign name="arrowleft" size={28} color="#FFA726" />
+</TouchableOpacity>
+
       <Text style={styles.encabezado}>Mis metas de ahorro</Text>
 
       <FlatList
@@ -71,7 +75,7 @@ export default function Objetivos() {
 
       <TouchableOpacity
         style={styles.botonMas}
-        onPress={() => router.push('/añadirobjetivo')}
+        onPress={() => router.push('/masobjetivo')}
       >
         <AntDesign name="pluscircle" size={65} color="#FFA726" />
       </TouchableOpacity>
@@ -127,4 +131,10 @@ const styles = StyleSheet.create({
     bottom: 30,
     right: 30,
   },
+  botonAtras: {
+  position: 'absolute',
+  top: 30,
+  left: 20,
+  zIndex: 10,
+}
 });

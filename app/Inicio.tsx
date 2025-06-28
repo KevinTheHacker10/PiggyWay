@@ -19,10 +19,10 @@ export default function Inicio() {
             {/* Puntos y progreso */}
             <View style={styles.puntosCard}>
                 <Text style={styles.labelPuntos}>Tus puntos</Text>
-                <Text style={styles.puntos}>5,000 pts</Text>
+                <Text style={styles.puntos}>0 pts</Text>
                 <Text style={styles.progresoLabel}>Progreso de la meta</Text>
                 <View style={styles.barraProgresoBase}>
-                    <View style={[styles.barraProgresoValor, { width: '75%' }]} />
+                    <View style={[styles.barraProgresoValor, { width: '1%' }]} />
                 </View>
             </View>
 
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     barraProgresoValor: {
         height: 10,
         backgroundColor: '#F79F1F',
-        borderRadius: 10,
+        borderRadius: 1,
     },
     card: {
         backgroundColor: '#fff',

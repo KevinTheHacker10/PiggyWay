@@ -1,16 +1,16 @@
-import { MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
 import {
-    Alert,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { auth, db } from '../firebase';
 
@@ -58,6 +58,10 @@ export default function AñadirObjetivo() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.botonAtras}>
+        <AntDesign name="arrowleft" size={28} color="#FFA726" />
+      </TouchableOpacity>
+
       <Text style={styles.titulo}>Crear nuevo objetivo</Text>
 
       <Text style={styles.label}>Nombre del objetivo</Text>
@@ -161,4 +165,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  botonAtras: {
+    position: 'absolute',
+    top: 30,
+    left: 20,
+    zIndex: 10,
+  }
 });

@@ -47,7 +47,11 @@ export default function Transacciones() {
       const data = querySnapshot.docs.map(doc => doc.data());
       setTransacciones(data);
 
-      const nuevoBalance = data.reduce((total, t) => total + parseFloat(t.monto), 0);
+      const nuevoBalance = data.reduce((total, t) => {
+        const monto = parseFloat(t.monto);
+        return t.tipo === 'gasto' ? total - monto : total + monto;
+      }, 0);
+
       setBalance(nuevoBalance);
     };
 
@@ -56,6 +60,9 @@ export default function Transacciones() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.botonAtras}>
+        <AntDesign name="arrowleft" size={28} color="#FFA726" />
+      </TouchableOpacity>
       <Text style={styles.titulo}>Transacciones</Text>
 
       <View style={styles.balanceBox}>
@@ -144,4 +151,11 @@ const styles = StyleSheet.create({
     bottom: 30,
     right: 30,
   },
+  botonAtras: {
+  position: 'absolute',
+  top: 30,
+  left: 20,
+  zIndex: 10,
+}
+
 });
