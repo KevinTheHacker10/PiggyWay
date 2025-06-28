@@ -28,6 +28,9 @@ export default function RootLayout() {
          <Stack.Screen name="Movimientos" options={{ headerShown: false }} />
          <Stack.Screen name="transacciones" options={{ headerShown: false }} />
          <Stack.Screen name="Inicio" options={{ headerShown: false }} />
+         <Stack.Screen name="Restablecer" options={{ headerShown: false }} />
+         <Stack.Screen name="objetivos" options={{ headerShown: false }} />
+         
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
