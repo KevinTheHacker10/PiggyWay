@@ -1,8 +1,7 @@
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useRouter } from 'expo-router';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { addDoc, collection, doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Platform,
@@ -12,13 +11,27 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { auth, db } from '../firebase';
 
 export default function AñadirObjetivo() {
+  const { id } = useLocalSearchParams();
+  const [modoEdicion, setModoEdicion] = useState(false);
   const [nombre, setNombre] = useState('');
   const [cantidad, setCantidad] = useState('');
   const [fecha, setFecha] = useState<Date | null>(null);
   const [mostrarPicker, setMostrarPicker] = useState(false);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [montoActual, setMontoActual] = useState(0);
+
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
+
+  const handleConfirmFecha = (date: Date) => {
+    setFecha(date);
+    hideDatePicker();
+  };
+
   const router = useRouter();
 
   const ideas = [
@@ -29,9 +42,29 @@ export default function AñadirObjetivo() {
     'Regalo',
     'Fiesta',
   ];
+  useEffect(() => {
+    const cargarObjetivo = async () => {
+      if (!id) return;
+
+      setModoEdicion(true);
+      const ref = doc(db, 'objetivos', id as string);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data();
+        setNombre(data.titulo || '');
+        setCantidad(String(data.montoMeta || ''));
+        setFecha(data.fechaLimite ? new Date(data.fechaLimite) : null);
+        setMontoActual(data.montoActual || 0);
+      }
+    };
+
+    cargarObjetivo();
+  }, [id]);
+
 
   const handleGuardar = async () => {
     const user = auth.currentUser;
+
     if (!user) {
       return Alert.alert('Error', 'Usuario no autenticado');
     }
@@ -40,15 +73,23 @@ export default function AñadirObjetivo() {
       return Alert.alert('Faltan datos', 'Debes ingresar nombre y cantidad');
     }
 
+    const datos = {
+      uid: user.uid,
+      titulo: nombre.trim(),
+      montoMeta: parseFloat(cantidad),
+      montoActual: modoEdicion ? montoActual : 0,
+      fechaLimite: fecha ? fecha.toISOString() : null,
+      creado: serverTimestamp(),
+      icono: 'star',
+      fondo: '#FFE0B2',
+    };
+
     try {
-      await addDoc(collection(db, 'objetivos'), {
-        uid: user.uid,
-        nombre,
-        cantidad: parseFloat(cantidad),
-        fechaLimite: fecha ? fecha.toISOString() : null,
-        creado: serverTimestamp(),
-        progreso: 0,
-      });
+      if (modoEdicion && id) {
+        await updateDoc(doc(db, 'objetivos', id as string), datos);
+      } else {
+        await addDoc(collection(db, 'objetivos'), datos);
+      }
 
       router.replace('/objetivos');
     } catch (error: any) {
@@ -56,13 +97,16 @@ export default function AñadirObjetivo() {
     }
   };
 
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => router.back()} style={styles.botonAtras}>
         <AntDesign name="arrowleft" size={28} color="#FFA726" />
       </TouchableOpacity>
 
-      <Text style={styles.titulo}>Crear nuevo objetivo</Text>
+      <Text style={styles.titulo}>
+        {modoEdicion ? 'Editar objetivo' : 'Crear nuevo objetivo'}
+      </Text>
 
       <Text style={styles.label}>Nombre del objetivo</Text>
       <TextInput
@@ -82,21 +126,41 @@ export default function AñadirObjetivo() {
       />
 
       <Text style={styles.label}>Fecha límite opcional</Text>
-      <TouchableOpacity style={styles.input} onPress={() => setMostrarPicker(true)}>
-        <Text>{fecha ? fecha.toLocaleDateString() : 'día/mes/año'}</Text>
-      </TouchableOpacity>
 
-      {mostrarPicker && (
-        <DateTimePicker
-          value={fecha || new Date()}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={(_, selectedDate) => {
-            setMostrarPicker(false);
-            if (selectedDate) setFecha(selectedDate);
-          }}
-        />
+      {Platform.OS === 'web' ? (
+        <View style={styles.input}>
+          {
+            React.createElement('input', {
+              type: 'date',
+              value: fecha ? fecha.toISOString().split('T')[0] : '',
+              onChange: (e) => setFecha(new Date(e.target.value)),
+              style: {
+                width: '100%',
+                border: 'none',
+                outline: 'none',
+                fontSize: 16,
+                backgroundColor: 'transparent',
+              }
+            })
+          }
+        </View>
+      ) : (
+        <>
+          <TouchableOpacity style={styles.input} onPress={showDatePicker}>
+            <Text>{fecha ? fecha.toLocaleDateString() : 'día/mes/año'}</Text>
+          </TouchableOpacity>
+
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible}
+            mode="date"
+            onConfirm={handleConfirmFecha}
+            onCancel={hideDatePicker}
+            minimumDate={new Date()}
+            date={fecha || new Date()}
+          />
+        </>
       )}
+
 
       <Text style={styles.subtitulo}>
         <MaterialIcons name="whatshot" size={16} color="#FFA726" /> Ideas de objetivos populares
@@ -115,7 +179,7 @@ export default function AñadirObjetivo() {
       </View>
 
       <TouchableOpacity style={styles.boton} onPress={handleGuardar}>
-        <Text style={styles.botonTexto}>Crear objetivo</Text>
+        <Text style={styles.botonTexto}>{modoEdicion ? 'Guardar cambios' : 'Crear objetivo'}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -172,3 +236,4 @@ const styles = StyleSheet.create({
     zIndex: 10,
   }
 });
+

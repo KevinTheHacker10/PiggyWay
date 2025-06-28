@@ -32,9 +32,9 @@ const handleConfirmFecha = (date: Date) => {
 
   const categorias = [
     { nombre: 'Compras', icono: <MaterialIcons name="shopping-bag" size={24} color="#FF9800" /> },
-    { nombre: 'Comestibles', icono: <MaterialCommunityIcons name="food-apple" size={24} color="#607D8B" /> },
-    { nombre: 'Facturas', icono: <FontAwesome5 name="file-invoice-dollar" size={24} color="#607D8B" /> },
-    { nombre: 'Pagos', icono: <MaterialIcons name="payment" size={24} color="#607D8B" /> },
+    { nombre: 'Comestibles', icono: <MaterialCommunityIcons name="food-apple" size={24} color="#FF9800" /> },
+    { nombre: 'Facturas', icono: <FontAwesome5 name="file-invoice-dollar" size={24} color="#FF9800" /> },
+    { nombre: 'Pagos', icono: <MaterialIcons name="payment" size={24} color="#FF9800" /> },
   ];
 
   const handleGuardar = async () => {

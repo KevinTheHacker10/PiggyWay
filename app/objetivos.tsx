@@ -1,45 +1,47 @@
 import { AntDesign } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native';
-
-const objetivosDummy = [
-  {
-    id: '1',
-    titulo: 'Vacaciones 2025',
-    progreso: 0.6,
-    montoActual: 50000,
-    montoMeta: 300000,
-    icono: 'piggy-bank',
-    fondo: '#FFE0B2',
-  },
-  {
-    id: '2',
-    titulo: 'Carro',
-    progreso: 0.25,
-    montoActual: 130000,
-    montoMeta: 325000,
-    icono: 'car',
-    fondo: '#C8E6C9',
-  },
-  {
-    id: '3',
-    titulo: 'Graduación',
-    progreso: 0.1,
-    montoActual: 30000,
-    montoMeta: 300000,
-    icono: 'graduation-cap',
-    fondo: '#E1F5FE',
-  },
-];
-
+import { useFocusEffect, useRouter } from 'expo-router';
+import { collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { auth, db } from '../firebase';
 export default function Objetivos() {
+  const [objetivos, setObjetivos] = useState<any[]>([]);
   const router = useRouter();
+  const handleEliminarObjetivo = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'objetivos', id));
+      setObjetivos(objetivos.filter(obj => obj.id !== id));
+    } catch (error) {
+      console.error('Error eliminando objetivo:', error);
+    }
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      const obtenerObjetivos = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const q = query(collection(db, 'objetivos'), where('uid', '==', user.uid));
+        const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map(doc => {
+          const d = doc.data();
+          return {
+            id: doc.id,
+            titulo: d.titulo || d.nombre || 'Objetivo sin nombre',
+            montoActual: d.montoActual,
+            montoMeta: d.montoMeta,
+            icono: d.icono || 'star',
+            fondo: d.fondo || '#FFF3E0',
+            progreso: d.montoActual / d.montoMeta,
+          };
+        });
+        setObjetivos(data);
+      };
+
+      obtenerObjetivos();
+    }, [])
+  );
+
 
   const renderObjetivo = (item: any) => (
     <View style={styles.objetivo}>
@@ -52,22 +54,28 @@ export default function Objetivos() {
           <View style={[styles.barra, { width: `${item.progreso * 100}%` }]} />
         </View>
         <Text style={styles.metaTexto}>
-          ₡{item.montoActual.toLocaleString()} / ₡{item.montoMeta.toLocaleString()}
+          ₡{item.montoActual ? item.montoActual.toLocaleString() : 0} / ₡{item.montoMeta ? item.montoMeta.toLocaleString() : 0}
         </Text>
       </View>
+      <TouchableOpacity onPress={() => router.push({ pathname: '/masobjetivo', params: { id: item.id } })}>
+        <AntDesign name="edit" size={24} color="#FFA726" style={{ marginLeft: 10 }} />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => handleEliminarObjetivo(item.id)}>
+        <AntDesign name="closecircle" size={24} color="#FF9800" />
+      </TouchableOpacity>
     </View>
   );
 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => router.back()} style={styles.botonAtras}>
-  <AntDesign name="arrowleft" size={28} color="#FFA726" />
-</TouchableOpacity>
+        <AntDesign name="arrowleft" size={28} color="#FFA726" />
+      </TouchableOpacity>
 
       <Text style={styles.encabezado}>Mis metas de ahorro</Text>
 
       <FlatList
-        data={objetivosDummy}
+        data={objetivos}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => renderObjetivo(item)}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -132,9 +140,9 @@ const styles = StyleSheet.create({
     right: 30,
   },
   botonAtras: {
-  position: 'absolute',
-  top: 30,
-  left: 20,
-  zIndex: 10,
-}
+    position: 'absolute',
+    top: 30,
+    left: 20,
+    zIndex: 10,
+  }
 });
