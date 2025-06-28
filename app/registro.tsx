@@ -1,40 +1,72 @@
-// registro.tsx
-import { MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { updateProfile } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
+  Platform,
   StyleSheet,
-  Text, TextInput, TouchableOpacity,
+  Text,
+  TextInput,
+  TouchableOpacity,
   View
 } from 'react-native';
-import { auth, createUserWithEmailAndPassword } from '../firebase';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { auth, createUserWithEmailAndPassword, db } from '../firebase';
+
 
 export default function Registro() {
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [confirmarPassword, setConfirmarPassword] = useState('');
-  const [fechaNacimiento] = useState(new Date());
+  const [fechaNacimiento, setFechaNacimiento] = useState(new Date());
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
+  const handleConfirm = (date: Date) => { setFechaNacimiento(date); hideDatePicker(); };
+  const [mostrarPicker, setMostrarPicker] = useState(false);
   const [verPassword, setVerPassword] = useState(false);
   const router = useRouter();
 
+  const handleRegistro = async () => {
+    if (password !== confirmarPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, correo, password);
+      const user = userCredential.user;
+      await updateProfile(userCredential.user, {
+        displayName: nombre,
+      });
+      await setDoc(doc(db, "usuarios", user.uid), {
+        uid: user.uid,
+        nombre,
+        correo,
+        fechaNacimiento: fechaNacimiento.toISOString(), // formato legible para Firebase
+        creadoEn: new Date().toISOString()
+      });
+      alert('Usuario registrado con éxito');
+      router.push({ pathname: '/Meta', params: { nombre } });
+    } catch (error: any) {
+      alert(error?.message ?? 'Ocurrió un error inesperado');
+    }
+  };
 
-const handleRegistro = async () => {
-  if (password !== confirmarPassword) {
-    alert('Las contraseñas no coinciden');
-    return;
-  }
-  try {
-    await createUserWithEmailAndPassword(auth, correo, password);
-    alert('Usuario registrado con éxito');
-    router.push({ pathname: '/Meta', params: { nombre } });// <-- Redirección a la pantalla Meta
-  } catch (error: any) {
-    alert(error?.message ?? 'Ocurrió un error inesperado');
-  }
-};
+  const onChangeFecha = (event: any, selectedDate?: Date) => {
+    setMostrarPicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setFechaNacimiento(selectedDate);
+    }
+  };
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.botonAtras}>
+        <AntDesign name="arrowleft" size={28} color="#FFA726" />
+      </TouchableOpacity>
+
       <Text style={styles.etapa}>1 de 2</Text>
       <Text style={styles.titulo}>¡Empecemos!</Text>
       <Text style={styles.subtitulo}>Crea tu cuenta</Text>
@@ -94,12 +126,42 @@ const handleRegistro = async () => {
       </View>
 
       <Text style={styles.label}>Fecha de Nacimiento</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="DD/MM/AAAA"
-        value={fechaNacimiento.toLocaleDateString('es-ES')}
-        editable={true}
-      />
+
+      {Platform.OS === 'web' ? (
+        <View style={styles.input}>
+          {
+            React.createElement('input', {
+              type: 'date',
+              value: fechaNacimiento.toISOString().split('T')[0],
+              onChange: (e) => setFechaNacimiento(new Date(e.target.value)),
+              style: {
+                width: '100%',
+                border: 'none',
+                outline: 'none',
+                fontSize: 16,
+              }
+            })
+          }
+        </View>
+      ) : (
+        <>
+          <TouchableOpacity
+            style={[styles.input, { justifyContent: 'center' }]}
+            onPress={showDatePicker}
+          >
+            <Text>{fechaNacimiento.toLocaleDateString('es-ES')}</Text>
+          </TouchableOpacity>
+
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible}
+            mode="date"
+            onConfirm={handleConfirm}
+            onCancel={hideDatePicker}
+            maximumDate={new Date()}
+            date={fechaNacimiento}
+          />
+        </>
+      )}
 
       <TouchableOpacity style={styles.boton} onPress={handleRegistro}>
         <Text style={styles.botonTexto}>Siguiente</Text>
@@ -107,6 +169,7 @@ const handleRegistro = async () => {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -169,4 +232,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  botonAtras: {
+    position: 'absolute',
+    top: 30,
+    left: 20,
+    zIndex: 10,
+  }
 });

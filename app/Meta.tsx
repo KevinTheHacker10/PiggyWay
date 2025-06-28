@@ -39,7 +39,6 @@ export default function Meta() {
         <View style={styles.container}>
             <Text style={styles.etapa}>2 de 2</Text>
             <Text style={styles.titulo}>¿Para qué estás ahorrando?</Text>
-
             <FlatList
                 data={metas}
                 keyExtractor={(item) => item.id}
@@ -141,4 +140,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
     },
+    botonAtras: {
+        position: 'absolute',
+        top: 30,
+        left: 20,
+        zIndex: 10,
+    }
 });

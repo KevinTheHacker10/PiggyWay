@@ -31,6 +31,7 @@ export default function RootLayout() {
          <Stack.Screen name="Restablecer" options={{ headerShown: false }} />
          <Stack.Screen name="objetivos" options={{ headerShown: false }} />
           <Stack.Screen name="masobjetivo" options={{ headerShown: false }} />
+          <Stack.Screen name="Meta" options={{ headerShown: false }} />
          
       </Stack>
       <StatusBar style="auto" />

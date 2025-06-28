@@ -1,8 +1,7 @@
 import { AntDesign, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   Image,
@@ -11,6 +10,7 @@ import {
   Text, TextInput, TouchableOpacity,
   View
 } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { auth, db } from '../firebase';
 
 export default function Movimientos() {
@@ -21,6 +21,14 @@ export default function Movimientos() {
   const [fecha, setFecha] = useState(new Date());
   const [mostrarPicker, setMostrarPicker] = useState(false);
   const router = useRouter();
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+const showDatePicker = () => setDatePickerVisibility(true);
+const hideDatePicker = () => setDatePickerVisibility(false);
+const handleConfirmFecha = (date: Date) => {
+  setFecha(date);
+  hideDatePicker();
+};
+
 
   const categorias = [
     { nombre: 'Compras', icono: <MaterialIcons name="shopping-bag" size={24} color="#FF9800" /> },
@@ -119,21 +127,41 @@ export default function Movimientos() {
       </View>
 
       <Text style={styles.label}>Fecha</Text>
-      <TouchableOpacity style={styles.input} onPress={() => setMostrarPicker(true)}>
-        <Text>{fecha.toLocaleDateString()}</Text>
-      </TouchableOpacity>
 
-      {mostrarPicker && (
-        <DateTimePicker
-          value={fecha}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={(_, selectedDate) => {
-            setMostrarPicker(false);
-            if (selectedDate) setFecha(selectedDate);
-          }}
-        />
-      )}
+{Platform.OS === 'web' ? (
+  <View style={styles.input}>
+    {
+      React.createElement('input', {
+        type: 'date',
+        value: fecha.toISOString().split('T')[0],
+        onChange: (e) => setFecha(new Date(e.target.value)),
+        style: {
+          width: '100%',
+          border: 'none',
+          outline: 'none',
+          fontSize: 16,
+          backgroundColor: 'transparent',
+        }
+      })
+    }
+  </View>
+) : (
+  <>
+    <TouchableOpacity style={styles.input} onPress={showDatePicker}>
+      <Text>{fecha.toLocaleDateString()}</Text>
+    </TouchableOpacity>
+
+    <DateTimePickerModal
+      isVisible={isDatePickerVisible}
+      mode="date"
+      onConfirm={handleConfirmFecha}
+      onCancel={hideDatePicker}
+      maximumDate={new Date()}
+      date={fecha}
+    />
+  </>
+)}
+
 
       <Image
         source={require('../assets/images/Piggy.jpg')}

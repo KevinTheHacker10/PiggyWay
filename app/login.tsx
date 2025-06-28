@@ -45,8 +45,10 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     const authInstance = getAuth();
     try {
-      await signInWithEmailAndPassword(authInstance, email, password);
+      const userCredential = await signInWithEmailAndPassword(authInstance, email, password);
+      await userCredential.user.reload(); // Esto asegura que displayName esté actualizado
       router.push('/Inicio');
+
     } catch (error) {
       if (typeof error === 'object' && error !== null && 'code' in error) {
         const errorCode = (error as { code: string }).code;
@@ -61,6 +63,7 @@ export default function LoginScreen() {
         setErrorMessage('Hubo un error al intentar iniciar sesión');
       }
     }
+
   };
 
   return (

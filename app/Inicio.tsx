@@ -1,11 +1,22 @@
 // app/Inicio.tsx
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { auth } from '../firebase';
 export default function Inicio() {
-    const { nombre } = useLocalSearchParams(); // Lee el nombre desde la URL si se pasa
-    const router = useRouter();
+    const [nombre, setNombre] = useState('');
+  const router = useRouter();
+
+  useFocusEffect(
+    useCallback(() => {
+      const user = auth.currentUser;
+      if (user) {
+        setNombre(user.displayName || '');
+      }
+    }, [])
+  );
 
     return (
         <View style={styles.container}>
