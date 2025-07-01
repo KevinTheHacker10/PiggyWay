@@ -1,5 +1,5 @@
 // firebase.js
-import { initializeApp } from "firebase/app";
+import { getApp, getApps, initializeApp } from "firebase/app";
 import {
   createUserWithEmailAndPassword as firebaseCreateUserWithEmailAndPassword,
   getAuth
@@ -17,7 +17,8 @@ const firebaseConfig = {
 };
 
 // Inicializa Firebase
-const app = initializeApp(firebaseConfig);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+
 
 // Exporta Auth y la función de registro
 export const auth = getAuth(app);
