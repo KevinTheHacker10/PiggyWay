@@ -18,8 +18,7 @@ export default function NotFoundScreen() {
       <Stack.Screen
         options={{
           headerShown: true,
-          headerTitle: '',        // sin título
-          // headerBackTitleVisible no existe en expo-router
+          headerTitle: '',
           headerTintColor: '#000',
           headerStyle: { backgroundColor: '#fff' },
         }}
@@ -41,7 +40,7 @@ export default function NotFoundScreen() {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            router.replace('/');  // vuelve a Home
+            router.replace('/'); 
           }}
         >
           <Text style={styles.buttonText}>Reintentar</Text>

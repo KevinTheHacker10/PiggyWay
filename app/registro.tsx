@@ -44,7 +44,7 @@ export default function Registro() {
         uid: user.uid,
         nombre,
         correo,
-        fechaNacimiento: fechaNacimiento.toISOString(), // formato legible para Firebase
+        fechaNacimiento: fechaNacimiento.toISOString(),
         creadoEn: new Date().toISOString()
       });
       alert('Usuario registrado con éxito');

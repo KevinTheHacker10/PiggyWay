@@ -72,6 +72,3 @@ const styles = StyleSheet.create({
   zIndex: 10,
 }
 });
-// This file is for resetting the password in the PiggyWay app.
-// It allows users to enter their email and receive a password reset link.
-// The user can navigate back to the login screen after requesting a reset.

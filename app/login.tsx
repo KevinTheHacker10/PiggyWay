@@ -5,14 +5,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { getAuth, GoogleAuthProvider, signInWithCredential, signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -46,7 +39,7 @@ export default function LoginScreen() {
     const authInstance = getAuth();
     try {
       const userCredential = await signInWithEmailAndPassword(authInstance, email, password);
-      await userCredential.user.reload(); // Esto asegura que displayName esté actualizado
+      await userCredential.user.reload(); 
       router.push('/Inicio');
 
     } catch (error) {

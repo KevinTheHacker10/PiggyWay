@@ -29,7 +29,7 @@ export default function Meta() {
     const finalizar = () => {
         if (seleccionada) {
             alert(`Meta seleccionada: ${metas.find(m => m.id === seleccionada)?.label}`);
-            router.replace('/'); // cambiar según ruta deseada
+            router.replace('/');
         } else {
             alert('Selecciona una meta antes de continuar.');
         }
